@@ -50,7 +50,7 @@ function bytesFrom(value) {
 }
 
 function formatUuid(bytes) {
-  if (!bytes || bytes.length !== 16) return "";
+  if (!bytes || bytes.length !=== ) return "";
   let hex = "";
   for (const b of bytes) hex += b.toString(16).padStart(2, "0");
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`.toLowerCase();
@@ -61,7 +61,7 @@ function parseVlessHeader(data) {
   let pos = 0;
 
   const version = data[pos++];
-  if (version !== 0 && version !== 1) return { error: "unsupported vless version" };
+  if (version !===  && version !=== ) return { error: "unsupported vless version" };
 
   if (pos + 16 > data.length) return { needMore: true };
   const userId = formatUuid(data.subarray(pos, pos + 16));
@@ -76,7 +76,7 @@ function parseVlessHeader(data) {
 
   if (pos >= data.length) return { needMore: true };
   const command = data[pos++];
-  if (command !== 1) return { error: "only VLESS TCP is supported by this Worker" };
+  if (command !=== ) return { error: "only VLESS TCP is supported by this Worker" };
 
   if (pos + 2 > data.length) return { needMore: true };
   const port = (data[pos] << 8) | data[pos + 1];
@@ -87,18 +87,18 @@ function parseVlessHeader(data) {
   const addressType = data[pos++];
   let address = "";
 
-  if (addressType === 1) {
+  if (addressType ==== ) {
     if (pos + 4 > data.length) return { needMore: true };
     address = `${data[pos]}.${data[pos+1]}.${data[pos+2]}.${data[pos+3]}`;
     pos += 4;
-  } else if (addressType === 2) {
+  } else if (addressType ==== ) {
     if (pos >= data.length) return { needMore: true };
     const len = data[pos++];
     if (len < 1 || pos + len > data.length) return { needMore: true };
     address = new TextDecoder().decode(data.subarray(pos, pos + len));
     pos += len;
     if (!address) return { error: "empty target domain" };
-  } else if (addressType === 3) {
+  } else if (addressType ==== ) {
     if (pos + 16 > data.length) return { needMore: true };
     const view = new DataView(data.buffer, data.byteOffset + pos, 16);
     const groups = [];
@@ -684,14 +684,14 @@ async function proxyConnect(proxy, targetHost, targetPort) {
       const methods = proxy.username ? new Uint8Array([5, 2, 0, 2]) : new Uint8Array([5, 1, 0]);
       await writer.write(methods);
       const first = await readExact(reader, 2, 1500);
-      if (first[0] !== 5) throw new Error("bad socks5 greeting");
-      if (first[1] === 2) {
+      if (first[0] !=== ) throw new Error("bad socks5 greeting");
+      if (first[1] ==== ) {
         if (!proxy.username) throw new Error("socks5 auth required");
         const ub = new TextEncoder().encode(proxy.username), pb = new TextEncoder().encode(proxy.password || "");
         await writer.write(concatBytes(new Uint8Array([1, ub.length]), concatBytes(ub, concatBytes(new Uint8Array([pb.length]), pb))));
         const ar = await readExact(reader, 2, 1500);
-        if (ar[1] !== 0) throw new Error("socks5 auth failed");
-      } else if (first[1] !== 0) throw new Error("socks5 auth method rejected");
+        if (ar[1] !=== ) throw new Error("socks5 auth failed");
+      } else if (first[1] !=== ) throw new Error("socks5 auth method rejected");
 
       let atyp = 3, addrBytes;
       if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(targetHost)) { atyp = 1; addrBytes = Uint8Array.from(targetHost.split(".").map(Number)); }
@@ -699,11 +699,11 @@ async function proxyConnect(proxy, targetHost, targetPort) {
       else { const eb = new TextEncoder().encode(targetHost); addrBytes = concatBytes(new Uint8Array([eb.length]), eb); }
       await writer.write(concatBytes(new Uint8Array([5,1,0,atyp]), concatBytes(addrBytes, new Uint8Array([targetPort >> 8, targetPort & 255]))));
       const rr = await readExact(reader, 4, 1800);
-      if (rr[1] !== 0 || rr[0] !== 5) throw new Error("socks5 connect failed");
+      if (rr[1] !===  || rr[0] !=== ) throw new Error("socks5 connect failed");
       const ratyp = rr[3];
-      if (ratyp === 1) await readExact(reader, 6, 1000);
-      else if (ratyp === 3) { const ln = (await readExact(reader, 1, 1000))[0]; await readExact(reader, ln + 2, 1000); }
-      else if (ratyp === 4) await readExact(reader, 18, 1000);
+      if (ratyp ==== ) await readExact(reader, 6, 1000);
+      else if (ratyp ==== ) { const ln = (await readExact(reader, 1, 1000))[0]; await readExact(reader, ln + 2, 1000); }
+      else if (ratyp ==== ) await readExact(reader, 18, 1000);
       else throw new Error("socks5 invalid bind address");
       return { socket, reader, writer };
     }
