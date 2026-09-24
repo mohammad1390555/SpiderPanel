@@ -38,7 +38,7 @@ import time
 
 import main as P
 
-logger = logging.getLogger("Panel-Bot")
+logger = # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.getLogger("Panel-Bot")
 
 TG_API = "https://api.telegram.org/bot{token}/{method}"
 
@@ -147,22 +147,18 @@ def _parse_money(s: str):
     s = s.replace(",", "").replace("٬", "").replace(" ", "")
     s = s.replace("تومان", "").replace("toman", "").replace("هزار", "000").replace("هزارتومان", "000")
     if not re.fullmatch(r"\d+", s):
-        return None
-    try:
+            try:
         return int(s)
     except Exception:
-        return None
-
+        
 
 def _parse_int(s: str):
     s = _fa_digits(str(s or "").strip()).replace(",", "")
     if not re.fullmatch(r"\d+", s):
-        return None
-    try:
+            try:
         return int(s)
     except Exception:
-        return None
-
+        
 
 # ── Telegram API helpers ────────────────────────────────────────────────────
 async def _call(token: str, method: str, json_body=None, files=None, data=None, timeout: float = 30.0) -> dict:
@@ -454,8 +450,7 @@ async def _ref_owner_by_code(code: str):
     for tid, rec in (cfg.get("refs") or {}).items():
         if str(rec.get("code") or "").lower() == code:
             return str(tid)
-    return None
-
+    
 
 # ── User creation ───────────────────────────────────────────────────────────
 async def _create_sub_user(chat_id: int, tg_user: dict, username: str, limit_gb: float = 0.0, expire_days: int = 0):
@@ -555,8 +550,7 @@ async def _create_sub_user(chat_id: int, tg_user: dict, username: str, limit_gb:
     # Pre-create the worker-style sub hash so the first /sub/{hash} resolves.
     try:
         P.ensure_sub_hash(config_uuid)
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
     await P.save_state()
     if any((P.INBOUNDS.get(iid) or {}).get("protocol") == "worker" for iid in inbound_ids) and P.WORKER.get("connected") is True:
@@ -566,8 +560,7 @@ async def _create_sub_user(chat_id: int, tg_user: dict, username: str, limit_gb:
             logger.warning("worker sync after bot user failed: %s", exc)
     try:
         asyncio.create_task(P._xray_apply())
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     P.log_activity("user", f"کاربر «{username}» از طریق ربات تلگرام ساخته شد", "ok")
     return user_id, dict(P.USERS.get(user_id) or _user_record), True
 
@@ -737,8 +730,7 @@ async def _exec_purchase(chat_id, tg_user, plan):
                             f"🎉 <b>پاداش معرفی!</b>\n\nبه کیف پولت <b>{_toman(bonus)} تومان</b> اضافه شد.\n"
                             f"دعوت‌ت با موفقیت اولین خرید انجام داد. 🚀",
                             buttons=[[{"text": "💳 کیف پول", "callback_data": "u:wallet"}]])
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
     if u:
         try:
             r = await _sub_report(u)
@@ -759,8 +751,7 @@ async def _exec_purchase(chat_id, tg_user, plan):
         try:
             if r and r.get("vless"):
                 await _send_photo(chat_id, _qrcode_png(r["vless"]), caption=f"QR کانفیگ {_html(r['username'])[:40]}")
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _menu_wallet(chat_id, msg_id=None):
@@ -911,8 +902,7 @@ async def _submit_receipt(chat_id, tg_user, payload: dict):
     if not (cfg.get("admin_ids")):
         try:
             await _send(chat_id, "⚠️ هنوز ادمینی برای بررسی رسید تنظیم نشده. به پشتیبانی پیام بده.")
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _admin_approve(rid, admin_id):
@@ -934,8 +924,7 @@ async def _admin_approve(rid, admin_id):
                     f"💳 موجودی: <b>{_toman(bal)} تومان</b>",
                     buttons=[[{"text": "🛒 برو به فروشگاه", "callback_data": "u:buy"},
                               {"text": "💳 کیف پول", "callback_data": "u:wallet"}]])
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return True, "تأیید شد"
 
 
@@ -954,8 +943,7 @@ async def _admin_reject(rid, admin_id):
                     f"❌ رسید <code>{rid}</code> رد شد.\n"
                     "در صورت اشکال، از بخش پشتیبانی پیام بده.",
                     buttons=[[{"text": "🛟 پشتیبانی", "callback_data": "u:support"}]])
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return True, "رد شد"
 
 
@@ -1014,8 +1002,7 @@ async def _menu_trial(chat_id, msg_id, tg_user):
     try:
         if r and r.get("vless"):
             await _send_photo(chat_id, _qrcode_png(r["vless"]), caption="QR کانفیگ تست رایگان")
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 
 async def _menu_gift(chat_id, msg_id=None):
@@ -2106,7 +2093,7 @@ async def _poll_loop():
             resp = await P.http_client.get(
                 TG_API.format(token=token, method="getUpdates"),
                 params=params,
-                timeout=65,
+                # timeout config,
             )
             data = resp.json()
             if not data.get("ok"):
@@ -2138,8 +2125,7 @@ def start_bot() -> asyncio.Task | None:
     cfg = _cfg()
     _stopped = False
     if not cfg.get("token"):
-        return None
-    if POLL_TASK and not POLL_TASK.done():
+            if POLL_TASK and not POLL_TASK.done():
         return POLL_TASK
     POLL_TASK = asyncio.create_task(_poll_loop(), name="spider-telegram-bot")
     return POLL_TASK
