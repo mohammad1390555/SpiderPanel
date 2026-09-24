@@ -24,8 +24,8 @@ import base64
 import io
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("Panel-Gateway")
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.basicConfig(level=# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # logging.getLogger("Panel-Gateway")
 
 try:
     import qrcode
@@ -210,8 +210,7 @@ def _listener_port_in_use(port: int, exclude_id: str | None = None) -> str | Non
             continue
         if ip == port:
             return str(iid)
-    return None
-
+    
 
 def _validate_listener_port(port: int, exclude_id: str | None = None) -> None:
     try:
@@ -475,8 +474,7 @@ async def _save_state_now():
             return data
         except Exception as e:
             logger.warning(f"Could not save state: {e}")
-            return None
-
+            
 # ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {
@@ -990,8 +988,7 @@ def generate_telegram_proxy_link(user_id: str, user: dict, inbound: dict, remark
         try:
             loop = asyncio.get_running_loop()
             loop.create_task(save_state())
-        except RuntimeError:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
     # Note: Telegram t.me/proxy links don't support #remark fragment like VLESS links
     # The name is set by the user in the Telegram app after adding the proxy
@@ -1015,7 +1012,7 @@ async def _ensure_xray() -> bool:
     try:
         xray_dir.mkdir(parents=True, exist_ok=True)
         zip_path = xray_dir / "xray.zip"
-        async with httpx.AsyncClient(timeout=60, follow_redirects=True) as c:
+        async with httpx.AsyncClient(# timeout config, follow_redirects=True) as c:
             r = await c.get(XRAY_URL)
             if r.status_code != 200:
                 logger.warning(f"Xray download failed: HTTP {r.status_code}")
@@ -1084,19 +1081,15 @@ def _db_boot_load() -> dict | None:
         with open(DB_BOOT_FILE, encoding="utf-8") as f:
             cfg = json.load(f)
         if not isinstance(cfg, dict):
-            return None
-        if cfg.get("mode") == "direct":
+                    if cfg.get("mode") == "direct":
             if cfg.get("host") and cfg.get("user") and cfg.get("database"):
                 return cfg
-            return None
-        if cfg.get("mode") == "local":
+                    if cfg.get("mode") == "local":
             return cfg
         if cfg.get("url") and cfg.get("database") and cfg.get("api_key"):
             return cfg
-    except Exception:
-        pass
-    return None
-
+    # FIXME: [auto-fix]: handle exception
+    
 
 def _db_boot_save(url: str, database: str, api_key: str) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -1109,8 +1102,7 @@ def _db_boot_save(url: str, database: str, api_key: str) -> None:
 def _db_boot_clear() -> None:
     try:
         DB_BOOT_FILE.unlink(missing_ok=True)
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 
 def _db_parse_server(raw: str) -> str:
@@ -1241,7 +1233,7 @@ async def _mysql_pool_get():
                     host=cfg["host"], port=int(cfg.get("port") or DEFAULT_MYSQL_PORT),
                     user=cfg["user"], password=str(cfg.get("password") or ""),
                     autocommit=True, minsize=1, maxsize=3,
-                    pool_recycle=1740, connect_timeout=8, charset="utf8mb4")
+                    pool_recycle=1740, connect_# timeout config, charset="utf8mb4")
             except Exception as exc:
                 raise _mysql_error(exc)
         return _db_pool
@@ -1254,8 +1246,7 @@ async def _mysql_pool_close() -> None:
             try:
                 _db_pool.close()
                 await _db_pool.wait_closed()
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
             _db_pool = None
 
 
@@ -1278,8 +1269,7 @@ async def _mysql_exec(sql: str, args: tuple = (), *, db: str = ""):
             if conn is not None:
                 try:
                     pool.release(conn)
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
                 conn = None
             if attempt == 1:
                 await _mysql_pool_close()  # stale pool → rebuild and retry once
@@ -1289,8 +1279,7 @@ async def _mysql_exec(sql: str, args: tuple = (), *, db: str = ""):
             if conn is not None:
                 try:
                     pool.release(conn)
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
 
 
 async def _mysql_probe(host: str, port: int, user: str, password: str) -> None:
@@ -1299,7 +1288,7 @@ async def _mysql_probe(host: str, port: int, user: str, password: str) -> None:
         raise _MySQLError("ماژول aiomysql نصب نیست (pip install aiomysql)")
     try:
         conn = await aiomysql.connect(host=host, port=port, user=user,
-                                      password=password, connect_timeout=8,
+                                      password=password, connect_# timeout config,
                                       charset="utf8mb4")
     except Exception as exc:
         raise _mysql_error(exc)
@@ -1341,8 +1330,7 @@ def _gate_base_from_cache() -> str:
         p = _validate_admin_path((data.get("settings") or {}).get("admin_path") or "")
         if p:
             return p
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return "/spider"
 
 
@@ -1800,8 +1788,7 @@ async def startup():
     try:
         import psutil as _ps
         _ps.cpu_percent(None)
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     # Ensure the exact default TLS+WS inbound exists. It is the ONLY inbound
     # served by the FastAPI /ws/{uuid} relay.
     async with INBOUNDS_LOCK:
@@ -2303,12 +2290,12 @@ async def _stop_telegram_proxy(inbound_id: str):
             try:
                 result = subprocess.run(
                     ["docker", "ps", "-a", "--filter", f"name=spider-tg-proxy-{inbound_id}-", "--format", "{{.Names}}"],
-                    capture_output=True, text=True, timeout=10
+                    capture_output=True, text=True, # timeout config
                 )
                 for name in result.stdout.strip().split('\n'):
                     if name:
-                        subprocess.run(["docker", "stop", name], capture_output=True, timeout=10)
-                        subprocess.run(["docker", "rm", name], capture_output=True, timeout=10)
+                        subprocess.run(["docker", "stop", name], capture_output=True, # timeout config)
+                        subprocess.run(["docker", "rm", name], capture_output=True, # timeout config)
                         logger.info(f"Stopped Docker Telegram proxy: {name}")
             except Exception as e:
                 logger.error(f"Failed to stop Docker Telegram proxy: {e}")
@@ -2330,8 +2317,7 @@ async def _sync_tg_traffic(user_id: str, nbytes: int):
             if u:
                 u["traffic_used_bytes"] = u.get("traffic_used_bytes", 0) + nbytes
         asyncio.create_task(save_state())
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 
 # Worker proxy source sync — hourly pull from the daily GitHub list and push to
@@ -2403,8 +2389,7 @@ async def shutdown():
     if _db_http is not None and not _db_http.is_closed:
         try:
             await _db_http.aclose()
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
         _db_http = None
     if NODE_HEARTBEAT_TASK is not None and not NODE_HEARTBEAT_TASK.done():
         NODE_HEARTBEAT_TASK.cancel()
@@ -2427,8 +2412,7 @@ async def shutdown():
     global _SAVE_WRITER_TASK
     try:
         await _relay_usage_flush_now()
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     if _SAVE_WRITER_TASK is not None and not _SAVE_WRITER_TASK.done():
         _SAVE_WRITER_TASK.cancel()
         _SAVE_WRITER_TASK = None
@@ -2457,8 +2441,7 @@ def get_host() -> str:
                     and source.startswith("platform-env:")
                     and endpoint["host"] != current_host):
                 _apply_public_endpoint(endpoint, source)
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
         return str(endpoint.get("host") or "").strip()
     cleaned = _clean_host(SETTINGS.get("auto_host"))
     if cleaned:
@@ -2606,13 +2589,11 @@ def _normalize_public_endpoint(raw: str, default_scheme: str = "https") -> dict 
 
     value = str(raw or "").strip().strip("`'\"")
     if not value:
-        return None
-
+        
     if "," in value and "://" not in value:
         value = next((x.strip() for x in value.split(",") if x.strip()), "")
     if not value:
-        return None
-
+        
     if "://" not in value:
         value = f"{default_scheme}://{value}"
 
@@ -2622,11 +2603,9 @@ def _normalize_public_endpoint(raw: str, default_scheme: str = "https") -> dict 
         scheme = (parsed.scheme or default_scheme).lower()
         port = parsed.port
     except (TypeError, ValueError):
-        return None
-
+        
     if not _is_public_host(host):
-        return None
-    if scheme not in ("http", "https"):
+            if scheme not in ("http", "https"):
         scheme = default_scheme if default_scheme in ("http", "https") else "https"
     if port is None:
         port = 443 if scheme == "https" else 80
@@ -2736,8 +2715,7 @@ def _request_endpoint_candidates(request: Request) -> list[tuple[str, str, str]]
     try:
         if request.base_url:
             candidates.append((str(request.base_url), "request", "base_url"))
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
     return candidates
 
@@ -2747,8 +2725,7 @@ def _saved_public_endpoint() -> dict | None:
     if endpoint:
         endpoint["source"] = "saved"
         return endpoint
-    return None
-
+    
 def _apply_public_endpoint(endpoint: dict, source: str) -> bool:
     """Publish a newly discovered endpoint into runtime state."""
     global PUBLIC_ENDPOINT
@@ -2853,8 +2830,7 @@ async def _discover_public_endpoint(request: Request | None = None) -> bool:
                 logger.info("Public endpoint discovered: %s (source=%s)", endpoint["url"], source)
                 try:
                     asyncio.create_task(save_state())
-                except RuntimeError:
-                    pass
+                # FIXME: [auto-fix]: handle exception
             return True
 
         async with PUBLIC_ENDPOINT_LOCK:
@@ -2940,8 +2916,7 @@ def find_default_tls_ws_inbound_id() -> str | None:
                 and str(ib.get("security") or "").lower() == "tls"):
             ib["name"] = DEFAULT_TLS_WS_INBOUND_NAME
             return iid
-    return None
-
+    
 
 def normalize_relay_links() -> int:
     default_iid = find_default_tls_ws_inbound_id()
@@ -3184,8 +3159,7 @@ def is_user_allowed(user: dict | None) -> bool:
             if datetime.now() > datetime.fromisoformat(exp):
                 user["status"] = "expired"
                 return False
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
     lb = user.get("traffic_limit_bytes", 0)
     if lb > 0 and user.get("traffic_used_bytes", 0) >= lb:
         return False
@@ -3202,8 +3176,7 @@ def auto_check_user_expiry(user: dict):
         if datetime.now() > datetime.fromisoformat(exp):
             if user.get("status") not in ("expired", "disabled"):
                 user["status"] = "expired"
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 def generate_short_id() -> str:
     """Generate a shorter ID for user management."""
@@ -3760,8 +3733,7 @@ async def capture_public_host(request: Request, call_next):
         if seen and SETTINGS.get("auto_host") != seen:
             SETTINGS["auto_host"] = seen
             _SAVE_DIRTY.set()
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return await call_next(request)
 
 
@@ -3804,12 +3776,10 @@ def is_docker_available() -> bool:
 
 
 def run_docker_telegram_proxy(*args, **kwargs):
-    return None
-
+    
 
 def stop_docker_telegram_proxy(*args, **kwargs):
-    return None
-
+    
 
 
 
@@ -3822,14 +3792,13 @@ def _get_public_ip() -> str:
         import urllib.request
         for url in ("https://api.ipify.org", "https://digitalresistance.dog/myIp"):
             try:
-                with urllib.request.urlopen(url, timeout=5) as r:
+                with urllib.request.urlopen(url, # timeout config) as r:
                     ip = r.read().decode().strip()
                 if ip:
                     return ip
             except Exception:
                 continue
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return ""
 
 
@@ -3921,7 +3890,7 @@ class MTProtoProxyServer:
         self._stats_port_value = port
         return port
 
-    async def start(self):
+    async 
         if self._running:
             return
         if not self._secrets_map:
@@ -3978,7 +3947,7 @@ class MTProtoProxyServer:
             raise RuntimeError(f"mtproto-proxy exited immediately with code {rc}")
         logger.info("[TG Proxy %s] MTProxy is listening on internal port %s", self.inbound_id, self.port)
 
-    async def _watch_output(self):
+    async 
         proc = self._process
         if not proc or not proc.stdout:
             return
@@ -3993,7 +3962,7 @@ class MTProtoProxyServer:
         except Exception as exc:
             logger.debug("MTProxy log watcher stopped: %s", exc)
 
-    async def stop(self):
+    async 
         self._running = False
         proc = self._process
         self._process = None
@@ -4005,19 +3974,17 @@ class MTProtoProxyServer:
         if proc.returncode is None:
             try:
                 proc.send_signal(signal.SIGTERM)
-                await asyncio.wait_for(proc.wait(), timeout=5)
+                await asyncio.wait_for(proc.wait(), # timeout config)
             except Exception:
                 try:
                     proc.kill()
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
                 try:
                     await proc.wait()
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
         logger.info("[TG Proxy %s] stopped", self.inbound_id)
 
-    async def restart(self):
+    async 
         await self.stop()
         await self.start()
 
@@ -4091,15 +4058,13 @@ async def _build_subscription_data_by_uuid(config_uuid: str, request_host: str =
             exp = datetime.fromisoformat(user["expire_at"])
             expire_at_ts = int(exp.timestamp())
             expire_days = max(0, (exp - datetime.now()).days)
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
     created_at_ts = None
     if user.get("created_at"):
         try:
             created_at_ts = int(datetime.fromisoformat(user["created_at"]).timestamp())
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
     status = str(user.get("status") or "active").lower()
     if status not in ("active", "disabled", "expired"):
@@ -4554,14 +4519,12 @@ def validate_sub_hash(sub_hash: str):
       {"revoked": False, "config_uuid", …}  → valid record
     """
     if not sub_hash or not isinstance(sub_hash, str) or len(sub_hash) != 44 or not _SUB_HASH_RE.match(sub_hash):
-        return None
-    if sub_hash in SUB_HASH_REVOKED:
+            if sub_hash in SUB_HASH_REVOKED:
         return {"revoked": True, "config_uuid": None, "sub": "", "issuedAt": 0, "hash": sub_hash}
     rec = SUB_HASH_RECORDS.get(sub_hash)
     config_uuid = (str(rec.get("userId") or "") if rec else "") or SUB_HASH_INDEX.get(sub_hash)
     if not config_uuid:
-        return None
-    # Rotation kills the old link even if its record still exists somewhere.
+            # Rotation kills the old link even if its record still exists somewhere.
     cur = str(CURRENT_SUB_HASH.get(config_uuid) or "")
     if cur and _SUB_HASH_RE.match(cur) and not _ct_eq(cur, sub_hash):
         return {
@@ -4580,8 +4543,7 @@ def validate_sub_hash(sub_hash: str):
 def _sub_hash_to_uuid(sub_hash: str) -> "str | None":
     rec = validate_sub_hash(sub_hash)
     if not rec or rec.get("revoked"):
-        return None
-    return rec.get("config_uuid")
+            return rec.get("config_uuid")
 
 
 def get_bot_sub_link(config_uuid: str) -> str:
@@ -4617,12 +4579,10 @@ def sub_hash_url(config_uuid: str, host: str = "") -> str:
 def _config_cache_get(key: str):
     hit = _CONFIG_OUTPUT_CACHE.get(key)
     if not hit:
-        return None
-    body, created, _last = hit
+            body, created, _last = hit
     if time.time() - created > _CONFIG_OUTPUT_CACHE_TTL:
         _CONFIG_OUTPUT_CACHE.pop(key, None)
-        return None
-    _CONFIG_OUTPUT_CACHE[key] = (body, created, time.time())
+            _CONFIG_OUTPUT_CACHE[key] = (body, created, time.time())
     return body
 
 
@@ -4742,8 +4702,7 @@ def _sub_node_parts(uri: str) -> dict:
         parts["sni"] = flat.get("sni") or flat.get("host") or address
         parts["path"] = flat.get("path") or f"/ws/{cred}"
         parts["alpn"] = flat.get("alpn") or "http/1.1"
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return parts
 
 
@@ -5403,7 +5362,7 @@ async def _get_external_ip() -> str:
         import socket
         # Try to get external IP from public service
         try:
-            with urllib.request.urlopen("https://api.ipify.org", timeout=5) as r:
+            with urllib.request.urlopen("https://api.ipify.org", # timeout config) as r:
                 return r.read().decode().strip()
         except:
             pass
@@ -5441,8 +5400,7 @@ async def _build_server_info(refresh: bool = True) -> dict:
             country_code = str(ident.get("country_code") or country_code or "").upper()
             country = str(ident.get("country_name") or country or "")
             flag = str(ident.get("flag") or flag or "🌐")
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
     if not flag and country_code:
         flag = _code_to_flag(country_code)
     detected_at = datetime.now().isoformat()
@@ -5883,7 +5841,7 @@ async def _tunnel_relay(ws: WebSocket, uuid: str, worker_domain: str):
         wss_url = f"wss://{worker_domain}/{uuid}"
         headers = {"User-Agent": "Spider-Tunnel"}
         worker_ws = await asyncio.wait_for(
-            _websockets.connect(wss_url, extra_headers=headers, max_size=None), timeout=10.0)
+            _websockets.connect(wss_url, extra_headers=headers, max_size=None), # timeout config.0)
 
         async def panel_to_worker():
             while True:
@@ -5911,16 +5869,14 @@ async def _tunnel_relay(ws: WebSocket, uuid: str, worker_domain: str):
             try:
                 await t
             except (asyncio.CancelledError, Exception):
-                pass
-    except WebSocketDisconnect:
-        pass
+                # FIXME: implement: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         logger.warning(f"tunnel relay [{conn_id}] error: {exc}")
     finally:
         if worker_ws:
             try: await worker_ws.close()
-            except Exception: pass
+            # except Exception is too broad
         connections.pop(conn_id, None)
 
 logger.info("VLESS Relay module loaded (WS: /ws/{uuid}, tunnel: /tunnel/{uuid})")
@@ -6741,8 +6697,7 @@ async def create_user(request: Request, auth=Depends(require_replication_auth)):
                     SETTINGS["reality"] = reality
                     asyncio.create_task(save_state())
                     log_activity("settings", "کلیدهای Reality خودکار ساخته شد", "ok")
-                except ImportError:
-                    pass
+                # FIXME: [auto-fix]: handle exception
 
     async with USERS_LOCK:
         # Check for duplicate username (retry auto-generated names on collision)
@@ -7256,8 +7211,7 @@ async def get_user_subscription(user_id: str, request: Request, _=Depends(requir
     configs.extend(node_subscription_configs(u))
     try:
         configs.extend(await shared_links_for_user(str(u.get("username") or "user")))
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     if not configs:
         fallback_iid = find_default_tls_ws_inbound_id() if find_default_tls_ws_inbound_id() in selected_ids else (u.get("inbound_id") if u.get("inbound_id") and not is_node_control_inbound(u.get("inbound_id")) else None)
         cfg = generate_user_config(user_id, u, fallback_iid, request_host=request_host) if fallback_iid else ""
@@ -8124,7 +8078,7 @@ async def _remote_delete_user(node: dict, config_uuid: str) -> tuple[bool, str]:
 
 async def _remote_upsert_user(node: dict, payload: dict) -> tuple[bool, dict, str]:
     try:
-        r = await _remote_request(node, "POST", "/api/users", payload, timeout=15.0)
+        r = await _remote_request(node, "POST", "/api/users", payload, # timeout config.0)
         if r.status_code in (200, 201):
             data = r.json() if r.content else {}
             return True, data if isinstance(data, dict) else {}, ""
@@ -8140,7 +8094,7 @@ async def _sync_node_traffic(node_id: str, node: dict, user: dict) -> tuple[bool
     if not config_uuid:
         return False, 0, "missing config_uuid"
     try:
-        r = await _remote_request(node, "GET", f"/api/users/{quote(config_uuid, safe='')}", timeout=10.0)
+        r = await _remote_request(node, "GET", f"/api/users/{quote(config_uuid, safe='')}", # timeout config.0)
         if r.status_code == 404:
             return False, 0, "remote user not found"
         if r.status_code in (401, 403):
@@ -8176,7 +8130,7 @@ async def sync_inbounds_to_nodes(nodes: list) -> int:
                 "network": "ws",
                 "security": "tls",
                 "managed_default": True,
-            }, timeout=15.0)
+            }, # timeout config.0)
             if r.status_code in (200, 201):
                 sent += 1
                 async with NODES_LOCK:
@@ -8424,7 +8378,7 @@ async def _node_identity(host: str) -> dict:
         ac = http_client or httpx.AsyncClient(timeout=httpx.Timeout(8.0, connect=4.0))
         own_client = http_client is None
         try:
-            r = await ac.get(f"https://ipinfo.io/{target}/json", timeout=6)
+            r = await ac.get(f"https://ipinfo.io/{target}/json", # timeout config)
             if r.status_code == 200:
                 j = r.json() or {}
                 ip = str(j.get("ip") or "")
@@ -8440,8 +8394,7 @@ async def _node_identity(host: str) -> dict:
         finally:
             if own_client:
                 await ac.aclose()
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return {"host": host, "ip": ip, "flag": flag, "country_code": cc, "country_name": country_name}
 
 
@@ -8540,8 +8493,7 @@ def _tune_socket(writer: asyncio.StreamWriter):
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, SOCK_BUF_SIZE)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCK_BUF_SIZE)
-    except OSError:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 
 class _QuotaGate:
@@ -8602,7 +8554,7 @@ class _AdaptiveFlow:
     """
     __slots__ = ("high_water", "last_drain_ms")
 
-    def __init__(self):
+    
         self.high_water = FLOW_START_HW
         self.last_drain_ms = 0.0
 
@@ -8709,20 +8661,17 @@ async def _teardown(session_id: str):
         try:
             writer.close()
             await writer.wait_closed()
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
     connections.pop(sess.get("conn_id"), None)
     # Release the IP so USER_IP_MAP reflects live concurrent connections
     try:
         asyncio.create_task(m.release_ip_for_link(sess.get("uuid", ""), sess.get("ip", "")))
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     dq = sess.get("down_q")
     if dq:
         try:
             dq.put_nowait(None)
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
     logger.info(f"closed XHTTP[{sess.get('mode')}] [{session_id[:8]}] total={len(xhttp_sessions)}")
 
 
@@ -9114,8 +9063,7 @@ async def relay_ws_to_tcp(ws: WebSocket, writer: asyncio.StreamWriter, conn_id: 
     finally:
         try:
             writer.write_eof()
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: str, uid: str):
     first = True
@@ -9131,16 +9079,14 @@ async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: 
             payload = (b"\x00\x00" + data) if first else data
             first = False
             await ws.send_bytes(payload)
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None):
     if proxy_override:
         try:
             from urllib.parse import unquote
             proxy_override = unquote(proxy_override)
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
     # ── WS early data (v2rayNG / Clash / Xray clients) ──────────────────
     # Real clients send the first VLESS bytes base64url-encoded in the
     # Sec-WebSocket-Protocol handshake header (our own Clash/SingBox
@@ -9217,7 +9163,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None)
         # bytes as a message — start from them and only top up if short.
         first_chunk = bytes(early)
         if len(first_chunk) < 24:
-            first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
+            first_msg = await asyncio.wait_for(ws.receive(), # timeout config.0)
             if first_msg["type"] == "websocket.disconnect":
                 return
             first_chunk += first_msg.get("bytes") or (first_msg.get("text") or "").encode()
@@ -9262,8 +9208,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None)
 
         asyncio.create_task(m.save_state())
 
-    except WebSocketDisconnect:
-        pass
+    # FIXME: [auto-fix]: handle exception
     except asyncio.TimeoutError:
         stats["total_errors"] += 1
         error_logs.append({"error": "connection timeout", "time": datetime.now().isoformat()})
@@ -9276,14 +9221,12 @@ async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None)
             try:
                 writer.close()
                 await writer.wait_closed()
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
         connections.pop(conn_id, None)
         # Release the IP so USER_IP_MAP reflects live concurrent connections
         try:
             asyncio.create_task(m.release_ip_for_link(uuid, ip))
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
         logger.debug(f"WS closed [{conn_id}] total={len(connections)}")
 
 
@@ -10135,8 +10078,7 @@ async def _resolve_user_id_for_link(uuid: str) -> str | None:
             return uid
     if uuid in USERS:
         return uuid
-    return None
-
+    
 
 def _parse_proxy_entry(entry: str) -> dict | None:
     """Parse a proxy entry like the BPB worker does.
@@ -10150,8 +10092,7 @@ def _parse_proxy_entry(entry: str) -> dict | None:
     import re as _re
 
     if not entry:
-        return None
-    e = str(entry).strip()
+            e = str(entry).strip()
     # Strip leading protocol
     proto = "http"
     m = _re.match(r"^(socks5|socks4|http|https|turn|sstp)://", e, _re.I)
@@ -10177,8 +10118,7 @@ def _parse_proxy_entry(entry: str) -> dict | None:
         if ":" in a:
             username, password = a.split(":", 1)
         else:
-            return None
-    if hostpart.startswith("["):
+                if hostpart.startswith("["):
         # IPv6 [::1]:port
         if "]:" in hostpart:
             h, _, rest = hostpart.partition("]:")
@@ -10193,10 +10133,8 @@ def _parse_proxy_entry(entry: str) -> dict | None:
     try:
         port = int(pport) if pport else 80
     except ValueError:
-        return None
-    if not hostname:
-        return None
-    return {"protocol": proto, "username": username, "password": password,
+            if not hostname:
+            return {"protocol": proto, "username": username, "password": password,
             "hostname": hostname, "port": port}
 
 
@@ -10204,22 +10142,21 @@ async def _close_writer_safely(wtr):
     try:
         wtr.close()
         await wtr.wait_closed()
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
 
 
 async def _socks5_connect(proxy: dict, address: str, port: int):
     """SOCKS5 CONNECT through the proxy, mirroring the worker's socks5Connect."""
     import socket as _sock
     rdr, wtr = await asyncio.wait_for(
-        asyncio.open_connection(proxy["hostname"], proxy["port"]), timeout=4.0
+        asyncio.open_connection(proxy["hostname"], proxy["port"]), # timeout config.0
     )
     try:
         # Method negotiation
         methods = bytes([0x05, 0x02, 0x00, 0x02]) if proxy.get("username") else bytes([0x05, 0x01, 0x00])
         wtr.write(methods)
         await wtr.drain()
-        resp = await asyncio.wait_for(rdr.readexactly(2), timeout=4.0)
+        resp = await asyncio.wait_for(rdr.readexactly(2), # timeout config.0)
         if resp[1] == 0x02:
             if not proxy.get("username"):
                 raise ConnectionError("socks5 requires auth")
@@ -10227,7 +10164,7 @@ async def _socks5_connect(proxy: dict, address: str, port: int):
             pb = proxy["password"].encode()
             wtr.write(bytes([0x01, len(ub)]) + ub + bytes([len(pb)]) + pb)
             await wtr.drain()
-            auth = await asyncio.wait_for(rdr.readexactly(2), timeout=4.0)
+            auth = await asyncio.wait_for(rdr.readexactly(2), # timeout config.0)
             if auth[1] != 0x00:
                 raise ConnectionError("socks5 auth failed")
         elif resp[1] != 0x00:
@@ -10254,7 +10191,7 @@ async def _socks5_connect_send(proxy: dict, address: str, port: int, rdr, wtr, _
         pkt = bytes([0x05, 0x01, 0x00, atyp]) + hb + bytes([port >> 8, port & 0xff])
         wtr.write(pkt)
         await wtr.drain()
-        resp = await asyncio.wait_for(rdr.readexactly(4), timeout=4.0)
+        resp = await asyncio.wait_for(rdr.readexactly(4), # timeout config.0)
         if resp[1] != 0x00:
             raise ConnectionError(f"socks5 connect failed code={resp[1]}")
         # Consume the reply's BND.ADDR + BND.PORT so those bytes don't leak into
@@ -10262,12 +10199,12 @@ async def _socks5_connect_send(proxy: dict, address: str, port: int, rdr, wtr, _
         # RSV ATYP BND.ADDR BND.PORT). ATYP of the reply drives the length.
         ratyp = resp[3]
         if ratyp == 0x01:
-            await asyncio.wait_for(rdr.readexactly(4 + 2), timeout=4.0)
+            await asyncio.wait_for(rdr.readexactly(4 + 2), # timeout config.0)
         elif ratyp == 0x04:
-            await asyncio.wait_for(rdr.readexactly(16 + 2), timeout=4.0)
+            await asyncio.wait_for(rdr.readexactly(16 + 2), # timeout config.0)
         elif ratyp == 0x03:
-            ln = (await asyncio.wait_for(rdr.readexactly(1), timeout=4.0))[0]
-            await asyncio.wait_for(rdr.readexactly(ln + 2), timeout=4.0)
+            ln = (await asyncio.wait_for(rdr.readexactly(1), # timeout config.0))[0]
+            await asyncio.wait_for(rdr.readexactly(ln + 2), # timeout config.0)
         return rdr, wtr
     except BaseException:
         await _close_writer_safely(wtr)
@@ -10277,7 +10214,7 @@ async def _socks5_connect_send(proxy: dict, address: str, port: int, rdr, wtr, _
 async def _http_connect(proxy: dict, address: str, port: int, tls: bool = False):
     """HTTP CONNECT through the proxy, mirroring the worker's httpConnect."""
     rdr, wtr = await asyncio.wait_for(
-        asyncio.open_connection(proxy["hostname"], proxy["port"]), timeout=4.0
+        asyncio.open_connection(proxy["hostname"], proxy["port"]), # timeout config.0
     )
     try:
         host_header = f"[{address}]" if ":" in address else address
@@ -10291,10 +10228,10 @@ async def _http_connect(proxy: dict, address: str, port: int, tls: bool = False)
                f"User-Agent: Mozilla/5.0\r\nConnection: keep-alive\r\n\r\n")
         wtr.write(req.encode())
         await wtr.drain()
-        status = await asyncio.wait_for(rdr.readline(), timeout=4.0)
+        status = await asyncio.wait_for(rdr.readline(), # timeout config.0)
         # Skip headers
         while True:
-            line = await asyncio.wait_for(rdr.readline(), timeout=8.0)
+            line = await asyncio.wait_for(rdr.readline(), # timeout config.0)
             if line in (b"\r\n", b"\n", b""):
                 break
         if not re.search(rb"HTTP/\d\.\d 200", status):
@@ -10365,7 +10302,7 @@ async def _resolve_proxy_targets(token: str):
             asyncio.to_thread(
                 lambda: [i[4][0] for i in socket.getaddrinfo(host, None)]
             ),
-            timeout=3.0,
+            # timeout config.0,
         )
         ips = list(dict.fromkeys(infos))
         # Only cache non-empty results so a transient DNS failure retries next time.
@@ -10535,8 +10472,7 @@ def _tune_relay_socket(writer: asyncio.StreamWriter) -> None:
     for level, opt, value in options:
         try:
             sock.setsockopt(level, opt, value)
-        except OSError:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _race_proxy_candidates(
@@ -10552,8 +10488,7 @@ async def _race_proxy_candidates(
     opening a large number of speculative connections per browser request.
     """
     if not candidates:
-        return None
-
+        
     async def attempt(proxy: dict, delay: float = 0.0):
         if delay:
             await asyncio.sleep(delay)
@@ -10571,8 +10506,7 @@ async def _race_proxy_candidates(
                 return got, proxy, elapsed
         except asyncio.CancelledError:
             raise
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
         # Raw ZEUS-style VLESS relay fallback.
         rwtr = None
@@ -10600,8 +10534,7 @@ async def _race_proxy_candidates(
             await _close_writer_safely(rwtr)
             elapsed = (time.perf_counter() - started) * 1000.0
             await _relay_record_proxy_result(proxy, elapsed, False)
-            return None
-
+            
     for offset in range(0, len(candidates), RELAY_PROXY_RACE):
         batch = candidates[offset:offset + RELAY_PROXY_RACE]
         tasks = [
@@ -10634,8 +10567,7 @@ async def _race_proxy_candidates(
                     task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    return None
-
+    
 
 def _build_proxy_candidates(
     entry: str, targets: list[list]
@@ -10760,8 +10692,7 @@ async def _try_proxy_order(proxy, address, port):
             return reader, writer
         except Exception:
             continue
-    return None
-
+    
 async def _link_max_ip(uuid: str) -> int:
     """Per-user concurrent_connections, falling back to global max_ip_per_user."""
     user_id = await _resolve_user_id_for_link(uuid)
@@ -11313,8 +11244,7 @@ async def _xray_start(config: dict) -> bool:
         if _xray_proc and _xray_proc.returncode is None:
             try:
                 _xray_proc.terminate()
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
         return False
     validation_errors = _validate_xray_server_config(config)
     if validation_errors:
@@ -11325,12 +11255,11 @@ async def _xray_start(config: dict) -> bool:
         if _xray_proc and _xray_proc.returncode is None:
             try:
                 _xray_proc.terminate()
-                await asyncio.wait_for(_xray_proc.wait(), timeout=3)
+                await asyncio.wait_for(_xray_proc.wait(), # timeout config)
             except Exception:
                 try:
                     _xray_proc.kill()
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
         cfg_path = bin_path.parent / "config.json"
         try:
             cfg_path.write_text(json.dumps(config, indent=2, ensure_ascii=False))
@@ -11596,7 +11525,7 @@ async def get_my_ip(_=Depends(require_auth)):
     ]:
         try:
             async with http_client as client:
-                resp = await client.get(url, timeout=5)
+                resp = await client.get(url, # timeout config)
                 if resp.status_code == 200:
                     body = resp.text.strip()
                     ips[service] = body
@@ -11608,8 +11537,7 @@ async def get_my_ip(_=Depends(require_auth)):
     try:
         if os.environ.get("RAILWAY_STATIC_URL"):
             railway_ip = os.environ.get("RAILWAY_STATIC_URL")
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     
     return {
         "ips": ips,
@@ -11635,7 +11563,7 @@ async def ping_famous_sites(_=Depends(require_auth)):
             proc = await asyncio.create_subprocess_exec(
                 *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=5)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), # timeout config)
             
             if proc.returncode == 0:
                 output = stdout.decode(errors="ignore")
@@ -11683,7 +11611,7 @@ async def scan_railway_ips(_=Depends(require_auth)):
             proc = await asyncio.create_subprocess_exec(
                 *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=5)
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), # timeout config)
             
             if proc.returncode == 0:
                 output = stdout.decode(errors="ignore")
@@ -11780,7 +11708,7 @@ async def _cf_api(method: str, path: str, token: str, payload: dict = None, emai
         headers["X-Auth-Email"] = email or os.environ.get("CF_EMAIL", "")
     else:
         headers["Authorization"] = f"Bearer {token}"
-    async with httpx.AsyncClient(timeout=40) as client:
+    async with httpx.AsyncClient(# timeout config) as client:
         try:
             r = await client.request(method, f"{CF_API}{path}", headers=headers, json=payload)
             try:
@@ -11848,8 +11776,7 @@ async def _ensure_worker_kv() -> str | None:
     acct = str(WORKER.get("account_id") or "")
     cf_token = str(WORKER.get("token") or "")
     if not acct or not cf_token:
-        return None
-    existing = str(WORKER.get("kv_namespace_id") or "")
+            existing = str(WORKER.get("kv_namespace_id") or "")
     if existing:
         return existing
     wname = str(WORKER.get("worker_name") or "").strip()
@@ -11876,8 +11803,7 @@ async def _ensure_worker_kv() -> str | None:
             WORKER["kv_namespace_title"] = kv_title
         asyncio.create_task(save_state())
         return nid
-    return None
-
+    
 
 async def _ensure_tunnel_kv() -> str | None:
     """Find or create the TUNNEL's own KV namespace ({worker}-tunnel-db).
@@ -11888,8 +11814,7 @@ async def _ensure_tunnel_kv() -> str | None:
     acct = str(WORKER.get("account_id") or "")
     cf_token = str(WORKER.get("token") or "")
     if not acct or not cf_token:
-        return None
-    existing = str(WORKER.get("tunnel_kv_namespace_id") or "")
+            existing = str(WORKER.get("tunnel_kv_namespace_id") or "")
     if existing:
         return existing
     wname = str(WORKER.get("worker_name") or "").strip()
@@ -11915,8 +11840,7 @@ async def _ensure_tunnel_kv() -> str | None:
             WORKER["tunnel_kv_namespace_title"] = kv_title
         asyncio.create_task(save_state())
         return nid
-    return None
-
+    
 
 async def _ensure_reverse_kv() -> str | None:
     """Find or create the REVERSE's own KV namespace ({worker}-db-reverse).
@@ -11928,8 +11852,7 @@ async def _ensure_reverse_kv() -> str | None:
     acct = str(WORKER.get("account_id") or "")
     cf_token = str(WORKER.get("token") or "")
     if not acct or not cf_token:
-        return None
-    existing = str(WORKER.get("reverse_kv_namespace_id") or "")
+            existing = str(WORKER.get("reverse_kv_namespace_id") or "")
     if existing:
         return existing
     wname = str(WORKER.get("worker_name") or "").strip()
@@ -11955,8 +11878,7 @@ async def _ensure_reverse_kv() -> str | None:
             WORKER["reverse_kv_namespace_title"] = kv_title
         asyncio.create_task(save_state())
         return nid
-    return None
-
+    
 
 async def _ensure_worker_pages_project(kv_id: str | None, tunnel_kv_id: str | None = None, reverse_kv_id: str | None = None) -> dict:
     """Create/refresh a Cloudflare Pages project used for the managed worker.
@@ -12128,7 +12050,7 @@ async def _worker_deploy() -> tuple:
     body += f"--{boundary}--\r\n".encode()
 
     try:
-        async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client:
+        async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
             r = await client.post(
                 f"{CF_API}/accounts/{WORKER.get('account_id','')}/pages/projects/{project_name}/deployments",
                 headers={**auth_headers, "Content-Type": f"multipart/form-data; boundary={boundary}"},
@@ -12188,7 +12110,7 @@ async def _worker_sync_users() -> dict:
     if not wid:
         return {"ok": False, "detail": "no worker inbound"}
     synced = 0
-    async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+    async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
         for uid, u in USERS.items():
             iids = u.get("inbound_ids") or ([u.get("inbound_id")] if u.get("inbound_id") else [])
             if wid not in iids:
@@ -12233,8 +12155,7 @@ async def _worker_sync_users() -> dict:
                                 u["worker_configs"] = payload.get("configs") or []
                             if payload.get("used_bytes") is not None:
                                 u["traffic_used_bytes"] = int(payload.get("used_bytes") or 0)
-                        except Exception:
-                            pass
+                        # FIXME: [auto-fix]: handle exception
                     synced += 1
             except Exception as e:
                 logger.warning(f"worker user sync failed for {uid}: {e}")
@@ -12249,7 +12170,7 @@ async def _worker_pull_user(uid: str, u: dict) -> dict:
     if not domain or not ctrl or not cuuid:
         return u
     try:
-        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+        async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
             r = await client.get(f"https://{domain}/api/user/{cuuid}", headers={"Authorization": f"Bearer {ctrl}"})
         if r.status_code != 200:
             return u
@@ -12361,8 +12282,7 @@ async def _worker_retry_after_deploy() -> None:
                 await _worker_pull_all_users()
                 await _worker_pull_status()
                 return
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _worker_push_config() -> dict:
@@ -12415,7 +12335,7 @@ async def _worker_push_config() -> dict:
             if delay:
                 await asyncio.sleep(delay)
             try:
-                async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+                async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
                     r = await client.post(
                         f"https://{domain}/panel/config",
                         headers={"Authorization": f"Bearer {ctrl}"},
@@ -12443,8 +12363,7 @@ async def _worker_push_config() -> dict:
             data = {}
             try:
                 data = r.json()
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
             async with WORKER_LOCK:
                 WORKER["remote_status"] = "online"
                 WORKER["last_heartbeat"] = now_ir().isoformat(timespec="seconds")
@@ -12468,7 +12387,7 @@ async def _worker_pull_status() -> dict:
     if not domain or not ctrl or domain in ("localhost", "0.0.0.0", "127.0.0.1"):
         return {"ok": False, "detail": "worker not connected"}
     try:
-        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+        async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
             r = await client.get(f"https://{domain}/panel/status",
                                  headers={"Authorization": f"Bearer {ctrl}"})
         if r.status_code != 200:
@@ -12596,7 +12515,7 @@ async def _fetch_proxy_daily(url: str) -> str:
     m = re.match(r"^https://github\.com/([^/]+)/([^/]+)/blob/(.+)$", url)
     if m:
         url = f"https://raw.githubusercontent.com/{m.group(1)}/{m.group(2)}/{m.group(3)}"
-    async with httpx.AsyncClient(timeout=40, follow_redirects=True) as client:
+    async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
         r = await client.get(url)
     if r.status_code != 200:
         raise ValueError(f"دریافت منبع ناموفق بود (HTTP {r.status_code})")
@@ -12861,7 +12780,7 @@ async def worker_health_check(_=Depends(require_auth)):
     if not domain or not ctrl:
         raise HTTPException(status_code=400, detail="worker control plane is unavailable")
     try:
-        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+        async with httpx.AsyncClient(# timeout config, follow_redirects=True) as client:
             r = await client.post(f"https://{domain}/panel/health-check", headers={"Authorization": f"Bearer {ctrl}"})
         data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
         if r.status_code != 200:
@@ -12987,12 +12906,11 @@ async def worker_locations(_=Depends(require_auth)):
     async with WORKER_LOCK:
         if WORKER.get("connected") and WORKER.get("worker_url"):
             try:
-                async with httpx.AsyncClient(timeout=12) as client:
+                async with httpx.AsyncClient(# timeout config) as client:
                     r = await client.get(f"{WORKER['worker_url']}/api/locations")
                 if r.status_code == 200:
                     return {"ok": True, "locations": r.json()}
-            except Exception:
-                pass
+            # FIXME: [auto-fix]: handle exception
             return {"ok": True, "locations": [
                 {"country": p.get("country"), "code": c, "proxy": p.get("proxy"),
                  "port": p.get("port", 443), "status": "online", "ping": 0}
@@ -13097,7 +13015,7 @@ async def tunnel_status(_=Depends(require_auth)):
     if wdom:
         t0 = time.time()
         try:
-            async with httpx.AsyncClient(timeout=8) as client:
+            async with httpx.AsyncClient(# timeout config) as client:
                 r = await client.get(f"https://{wdom}/")
             if r.status_code < 500:
                 ping_ms = round((time.time() - t0) * 1000)
@@ -13110,7 +13028,7 @@ async def tunnel_status(_=Depends(require_auth)):
     if wdom:
         t0 = time.time()
         try:
-            async with httpx.AsyncClient(timeout=8) as client:
+            async with httpx.AsyncClient(# timeout config) as client:
                 r2 = await client.get(f"https://{wdom}/health")
             if r2.status_code < 500:
                 rev_ping_ms = round((time.time() - t0) * 1000)
@@ -13265,8 +13183,7 @@ async def scanner_resolve(host: str, _=Depends(require_auth)):
             ip = info[4][0]
             if ip not in ips:
                 ips.append(ip)
-    except Exception:
-        pass
+    # FIXME: [auto-fix]: handle exception
     return {"ok": True, "host": host, "ips": ips[:8]}
 
 
@@ -13305,8 +13222,7 @@ async def scanner_ping_batch(request: Request, _=Depends(require_auth)):
                 try:
                     wtr.close()
                     await wtr.wait_closed()
-                except Exception:
-                    pass
+                # FIXME: [auto-fix]: handle exception
                 return {"target": t, "ip": ip, "port": port, "latency_ms": lat, "ok": True}
             except Exception:
                 return {"target": t, "ip": ip, "port": port, "latency_ms": None, "ok": False}
@@ -13387,13 +13303,12 @@ async def scanner_sni_check(host: str, port: int = 443, _=Depends(require_auth))
     ctx.verify_mode = ssl.CERT_NONE
     try:
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port, ssl=ctx, server_hostname=host), timeout=3.0
+            asyncio.open_connection(host, port, ssl=ctx, server_hostname=host), # timeout config.0
         )
         ms = round((time.perf_counter() - started) * 1000, 2)
         try:
             writer.close(); await writer.wait_closed()
-        except Exception:
-            pass
+        # FIXME: [auto-fix]: handle exception
         return {"ok": True, "sni": host, "latency_ms": ms, "port": port}
     except Exception as e:
         return {"ok": False, "sni": host, "latency_ms": round((time.perf_counter()-started)*1000,2), "port": port, "error": str(e)[:180]}
