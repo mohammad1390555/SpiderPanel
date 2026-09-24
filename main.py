@@ -701,7 +701,11 @@ SESSION_TTL = 60 * 60 * 24 * 7
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
-AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
+AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD"))}
+if "password_hash" not in AUTH or not AUTH["password_hash"]:
+    # Require ADMIN_PASSWORD at startup — never accept a hardcoded default
+    print("ERROR: ADMIN_PASSWORD environment variable is required", file=sys.stderr)
+    sys.exit(1)
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
 
