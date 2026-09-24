@@ -64,7 +64,7 @@ CONFIG = {
     # The panel must always listen on 8080 (the user's VPN clients and any
     # Railway TCP relay expect this port). Never let a PORT env var override it.
     "port": 8080,
-    "secret": os.environ.get("SECRET_KEY", "spider-panel-secret-key-v2"),
+    "secret": os.environ.get("SECRET_KEY"),
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
 
