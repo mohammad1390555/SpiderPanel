@@ -24,8 +24,8 @@ import base64
 import io
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("Panel-Gateway")
+# logging.basicConfig(level=# logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = # logging.getLogger("Panel-Gateway")
 
 try:
     import qrcode
@@ -5865,8 +5865,7 @@ async def _tunnel_relay(ws: WebSocket, uuid: str, worker_domain: str):
             try:
                 await t
             except (asyncio.CancelledError, Exception):
-                pass
-    # FIXME: [auto-fix]: handle exception
+                # FIXME: implement: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         logger.warning(f"tunnel relay [{conn_id}] error: {exc}")
