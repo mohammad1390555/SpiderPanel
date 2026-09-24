@@ -984,7 +984,7 @@ def generate_telegram_proxy_link(user_id: str, user: dict, inbound: dict, remark
         try:
             loop = asyncio.get_running_loop()
             loop.create_task(save_state())
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
     # Note: Telegram t.me/proxy links don't support #remark fragment like VLESS links
     # The name is set by the user in the Telegram app after adding the proxy
@@ -1084,7 +1084,7 @@ def _db_boot_load() -> dict | None:
             return cfg
         if cfg.get("url") and cfg.get("database") and cfg.get("api_key"):
             return cfg
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     
 
 def _db_boot_save(url: str, database: str, api_key: str) -> None:
@@ -1098,7 +1098,7 @@ def _db_boot_save(url: str, database: str, api_key: str) -> None:
 def _db_boot_clear() -> None:
     try:
         DB_BOOT_FILE.unlink(missing_ok=True)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 
 def _db_parse_server(raw: str) -> str:
@@ -1242,7 +1242,7 @@ async def _mysql_pool_close() -> None:
             try:
                 _db_pool.close()
                 await _db_pool.wait_closed()
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
             _db_pool = None
 
 
@@ -1265,7 +1265,7 @@ async def _mysql_exec(sql: str, args: tuple = (), *, db: str = ""):
             if conn is not None:
                 try:
                     pool.release(conn)
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
                 conn = None
             if attempt == 1:
                 await _mysql_pool_close()  # stale pool → rebuild and retry once
@@ -1275,7 +1275,7 @@ async def _mysql_exec(sql: str, args: tuple = (), *, db: str = ""):
             if conn is not None:
                 try:
                     pool.release(conn)
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
 
 
 async def _mysql_probe(host: str, port: int, user: str, password: str) -> None:
@@ -1326,7 +1326,7 @@ def _gate_base_from_cache() -> str:
         p = _validate_admin_path((data.get("settings") or {}).get("admin_path") or "")
         if p:
             return p
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return "/spider"
 
 
@@ -1784,7 +1784,7 @@ async def startup():
     try:
         import psutil as _ps
         _ps.cpu_percent(None)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     # Ensure the exact default TLS+WS inbound exists. It is the ONLY inbound
     # served by the FastAPI /ws/{uuid} relay.
     async with INBOUNDS_LOCK:
@@ -2313,7 +2313,7 @@ async def _sync_tg_traffic(user_id: str, nbytes: int):
             if u:
                 u["traffic_used_bytes"] = u.get("traffic_used_bytes", 0) + nbytes
         asyncio.create_task(save_state())
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 
 # Worker proxy source sync — hourly pull from the daily GitHub list and push to
@@ -2385,7 +2385,7 @@ async def shutdown():
     if _db_http is not None and not _db_http.is_closed:
         try:
             await _db_http.aclose()
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
         _db_http = None
     if NODE_HEARTBEAT_TASK is not None and not NODE_HEARTBEAT_TASK.done():
         NODE_HEARTBEAT_TASK.cancel()
@@ -2408,7 +2408,7 @@ async def shutdown():
     global _SAVE_WRITER_TASK
     try:
         await _relay_usage_flush_now()
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     if _SAVE_WRITER_TASK is not None and not _SAVE_WRITER_TASK.done():
         _SAVE_WRITER_TASK.cancel()
         _SAVE_WRITER_TASK = None
@@ -2437,7 +2437,7 @@ def get_host() -> str:
                     and source.startswith("platform-env:")
                     and endpoint["host"] != current_host):
                 _apply_public_endpoint(endpoint, source)
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
         return str(endpoint.get("host") or "").strip()
     cleaned = _clean_host(SETTINGS.get("auto_host"))
     if cleaned:
@@ -2711,7 +2711,7 @@ def _request_endpoint_candidates(request: Request) -> list[tuple[str, str, str]]
     try:
         if request.base_url:
             candidates.append((str(request.base_url), "request", "base_url"))
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
     return candidates
 
@@ -2826,7 +2826,7 @@ async def _discover_public_endpoint(request: Request | None = None) -> bool:
                 logger.info("Public endpoint discovered: %s (source=%s)", endpoint["url"], source)
                 try:
                     asyncio.create_task(save_state())
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
             return True
 
         async with PUBLIC_ENDPOINT_LOCK:
@@ -3155,7 +3155,7 @@ def is_user_allowed(user: dict | None) -> bool:
             if datetime.now() > datetime.fromisoformat(exp):
                 user["status"] = "expired"
                 return False
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
     lb = user.get("traffic_limit_bytes", 0)
     if lb > 0 and user.get("traffic_used_bytes", 0) >= lb:
         return False
@@ -3172,7 +3172,7 @@ def auto_check_user_expiry(user: dict):
         if datetime.now() > datetime.fromisoformat(exp):
             if user.get("status") not in ("expired", "disabled"):
                 user["status"] = "expired"
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 def generate_short_id() -> str:
     """Generate a shorter ID for user management."""
@@ -3729,7 +3729,7 @@ async def capture_public_host(request: Request, call_next):
         if seen and SETTINGS.get("auto_host") != seen:
             SETTINGS["auto_host"] = seen
             _SAVE_DIRTY.set()
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return await call_next(request)
 
 
@@ -3794,7 +3794,7 @@ def _get_public_ip() -> str:
                     return ip
             except Exception:
                 continue
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return ""
 
 
@@ -3974,10 +3974,10 @@ class MTProtoProxyServer:
             except Exception:
                 try:
                     proc.kill()
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
                 try:
                     await proc.wait()
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
         logger.info("[TG Proxy %s] stopped", self.inbound_id)
 
     async 
@@ -4054,13 +4054,13 @@ async def _build_subscription_data_by_uuid(config_uuid: str, request_host: str =
             exp = datetime.fromisoformat(user["expire_at"])
             expire_at_ts = int(exp.timestamp())
             expire_days = max(0, (exp - datetime.now()).days)
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
     created_at_ts = None
     if user.get("created_at"):
         try:
             created_at_ts = int(datetime.fromisoformat(user["created_at"]).timestamp())
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
     status = str(user.get("status") or "active").lower()
     if status not in ("active", "disabled", "expired"):
@@ -4698,7 +4698,7 @@ def _sub_node_parts(uri: str) -> dict:
         parts["sni"] = flat.get("sni") or flat.get("host") or address
         parts["path"] = flat.get("path") or f"/ws/{cred}"
         parts["alpn"] = flat.get("alpn") or "http/1.1"
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return parts
 
 
@@ -5396,7 +5396,7 @@ async def _build_server_info(refresh: bool = True) -> dict:
             country_code = str(ident.get("country_code") or country_code or "").upper()
             country = str(ident.get("country_name") or country or "")
             flag = str(ident.get("flag") or flag or "🌐")
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
     if not flag and country_code:
         flag = _code_to_flag(country_code)
     detected_at = datetime.now().isoformat()
@@ -5866,7 +5866,7 @@ async def _tunnel_relay(ws: WebSocket, uuid: str, worker_domain: str):
                 await t
             except (asyncio.CancelledError, Exception):
                 pass
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     except Exception as exc:
         stats["total_errors"] += 1
         logger.warning(f"tunnel relay [{conn_id}] error: {exc}")
@@ -6694,7 +6694,7 @@ async def create_user(request: Request, auth=Depends(require_replication_auth)):
                     SETTINGS["reality"] = reality
                     asyncio.create_task(save_state())
                     log_activity("settings", "کلیدهای Reality خودکار ساخته شد", "ok")
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
 
     async with USERS_LOCK:
         # Check for duplicate username (retry auto-generated names on collision)
@@ -7208,7 +7208,7 @@ async def get_user_subscription(user_id: str, request: Request, _=Depends(requir
     configs.extend(node_subscription_configs(u))
     try:
         configs.extend(await shared_links_for_user(str(u.get("username") or "user")))
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     if not configs:
         fallback_iid = find_default_tls_ws_inbound_id() if find_default_tls_ws_inbound_id() in selected_ids else (u.get("inbound_id") if u.get("inbound_id") and not is_node_control_inbound(u.get("inbound_id")) else None)
         cfg = generate_user_config(user_id, u, fallback_iid, request_host=request_host) if fallback_iid else ""
@@ -8391,7 +8391,7 @@ async def _node_identity(host: str) -> dict:
         finally:
             if own_client:
                 await ac.aclose()
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return {"host": host, "ip": ip, "flag": flag, "country_code": cc, "country_name": country_name}
 
 
@@ -8490,7 +8490,7 @@ def _tune_socket(writer: asyncio.StreamWriter):
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, SOCK_BUF_SIZE)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCK_BUF_SIZE)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 
 class _QuotaGate:
@@ -8658,17 +8658,17 @@ async def _teardown(session_id: str):
         try:
             writer.close()
             await writer.wait_closed()
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
     connections.pop(sess.get("conn_id"), None)
     # Release the IP so USER_IP_MAP reflects live concurrent connections
     try:
         asyncio.create_task(m.release_ip_for_link(sess.get("uuid", ""), sess.get("ip", "")))
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     dq = sess.get("down_q")
     if dq:
         try:
             dq.put_nowait(None)
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
     logger.info(f"closed XHTTP[{sess.get('mode')}] [{session_id[:8]}] total={len(xhttp_sessions)}")
 
 
@@ -9060,7 +9060,7 @@ async def relay_ws_to_tcp(ws: WebSocket, writer: asyncio.StreamWriter, conn_id: 
     finally:
         try:
             writer.write_eof()
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: str, uid: str):
     first = True
@@ -9076,14 +9076,14 @@ async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: 
             payload = (b"\x00\x00" + data) if first else data
             first = False
             await ws.send_bytes(payload)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None):
     if proxy_override:
         try:
             from urllib.parse import unquote
             proxy_override = unquote(proxy_override)
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
     # ── WS early data (v2rayNG / Clash / Xray clients) ──────────────────
     # Real clients send the first VLESS bytes base64url-encoded in the
     # Sec-WebSocket-Protocol handshake header (our own Clash/SingBox
@@ -9205,7 +9205,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None)
 
         asyncio.create_task(m.save_state())
 
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     except asyncio.TimeoutError:
         stats["total_errors"] += 1
         error_logs.append({"error": "connection timeout", "time": datetime.now().isoformat()})
@@ -9218,12 +9218,12 @@ async def websocket_tunnel(ws: WebSocket, uuid: str, proxy_override: str = None)
             try:
                 writer.close()
                 await writer.wait_closed()
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
         connections.pop(conn_id, None)
         # Release the IP so USER_IP_MAP reflects live concurrent connections
         try:
             asyncio.create_task(m.release_ip_for_link(uuid, ip))
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
         logger.debug(f"WS closed [{conn_id}] total={len(connections)}")
 
 
@@ -10139,7 +10139,7 @@ async def _close_writer_safely(wtr):
     try:
         wtr.close()
         await wtr.wait_closed()
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 
 async def _socks5_connect(proxy: dict, address: str, port: int):
@@ -10469,7 +10469,7 @@ def _tune_relay_socket(writer: asyncio.StreamWriter) -> None:
     for level, opt, value in options:
         try:
             sock.setsockopt(level, opt, value)
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _race_proxy_candidates(
@@ -10503,7 +10503,7 @@ async def _race_proxy_candidates(
                 return got, proxy, elapsed
         except asyncio.CancelledError:
             raise
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
         # Raw ZEUS-style VLESS relay fallback.
         rwtr = None
@@ -11241,7 +11241,7 @@ async def _xray_start(config: dict) -> bool:
         if _xray_proc and _xray_proc.returncode is None:
             try:
                 _xray_proc.terminate()
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
         return False
     validation_errors = _validate_xray_server_config(config)
     if validation_errors:
@@ -11256,7 +11256,7 @@ async def _xray_start(config: dict) -> bool:
             except Exception:
                 try:
                     _xray_proc.kill()
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
         cfg_path = bin_path.parent / "config.json"
         try:
             cfg_path.write_text(json.dumps(config, indent=2, ensure_ascii=False))
@@ -11534,7 +11534,7 @@ async def get_my_ip(_=Depends(require_auth)):
     try:
         if os.environ.get("RAILWAY_STATIC_URL"):
             railway_ip = os.environ.get("RAILWAY_STATIC_URL")
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     
     return {
         "ips": ips,
@@ -12152,7 +12152,7 @@ async def _worker_sync_users() -> dict:
                                 u["worker_configs"] = payload.get("configs") or []
                             if payload.get("used_bytes") is not None:
                                 u["traffic_used_bytes"] = int(payload.get("used_bytes") or 0)
-                        # TODO: handle exception
+                        # FIXME: [auto-fix]: handle exception
                     synced += 1
             except Exception as e:
                 logger.warning(f"worker user sync failed for {uid}: {e}")
@@ -12279,7 +12279,7 @@ async def _worker_retry_after_deploy() -> None:
                 await _worker_pull_all_users()
                 await _worker_pull_status()
                 return
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _worker_push_config() -> dict:
@@ -12360,7 +12360,7 @@ async def _worker_push_config() -> dict:
             data = {}
             try:
                 data = r.json()
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
             async with WORKER_LOCK:
                 WORKER["remote_status"] = "online"
                 WORKER["last_heartbeat"] = now_ir().isoformat(timespec="seconds")
@@ -12907,7 +12907,7 @@ async def worker_locations(_=Depends(require_auth)):
                     r = await client.get(f"{WORKER['worker_url']}/api/locations")
                 if r.status_code == 200:
                     return {"ok": True, "locations": r.json()}
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
             return {"ok": True, "locations": [
                 {"country": p.get("country"), "code": c, "proxy": p.get("proxy"),
                  "port": p.get("port", 443), "status": "online", "ping": 0}
@@ -13180,7 +13180,7 @@ async def scanner_resolve(host: str, _=Depends(require_auth)):
             ip = info[4][0]
             if ip not in ips:
                 ips.append(ip)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return {"ok": True, "host": host, "ips": ips[:8]}
 
 
@@ -13219,7 +13219,7 @@ async def scanner_ping_batch(request: Request, _=Depends(require_auth)):
                 try:
                     wtr.close()
                     await wtr.wait_closed()
-                # TODO: handle exception
+                # FIXME: [auto-fix]: handle exception
                 return {"target": t, "ip": ip, "port": port, "latency_ms": lat, "ok": True}
             except Exception:
                 return {"target": t, "ip": ip, "port": port, "latency_ms": None, "ok": False}
@@ -13305,7 +13305,7 @@ async def scanner_sni_check(host: str, port: int = 443, _=Depends(require_auth))
         ms = round((time.perf_counter() - started) * 1000, 2)
         try:
             writer.close(); await writer.wait_closed()
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
         return {"ok": True, "sni": host, "latency_ms": ms, "port": port}
     except Exception as e:
         return {"ok": False, "sni": host, "latency_ms": round((time.perf_counter()-started)*1000,2), "port": port, "error": str(e)[:180]}

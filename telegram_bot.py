@@ -550,7 +550,7 @@ async def _create_sub_user(chat_id: int, tg_user: dict, username: str, limit_gb:
     # Pre-create the worker-style sub hash so the first /sub/{hash} resolves.
     try:
         P.ensure_sub_hash(config_uuid)
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
     await P.save_state()
     if any((P.INBOUNDS.get(iid) or {}).get("protocol") == "worker" for iid in inbound_ids) and P.WORKER.get("connected") is True:
@@ -560,7 +560,7 @@ async def _create_sub_user(chat_id: int, tg_user: dict, username: str, limit_gb:
             logger.warning("worker sync after bot user failed: %s", exc)
     try:
         asyncio.create_task(P._xray_apply())
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     P.log_activity("user", f"کاربر «{username}» از طریق ربات تلگرام ساخته شد", "ok")
     return user_id, dict(P.USERS.get(user_id) or _user_record), True
 
@@ -730,7 +730,7 @@ async def _exec_purchase(chat_id, tg_user, plan):
                             f"🎉 <b>پاداش معرفی!</b>\n\nبه کیف پولت <b>{_toman(bonus)} تومان</b> اضافه شد.\n"
                             f"دعوت‌ت با موفقیت اولین خرید انجام داد. 🚀",
                             buttons=[[{"text": "💳 کیف پول", "callback_data": "u:wallet"}]])
-            # TODO: handle exception
+            # FIXME: [auto-fix]: handle exception
     if u:
         try:
             r = await _sub_report(u)
@@ -751,7 +751,7 @@ async def _exec_purchase(chat_id, tg_user, plan):
         try:
             if r and r.get("vless"):
                 await _send_photo(chat_id, _qrcode_png(r["vless"]), caption=f"QR کانفیگ {_html(r['username'])[:40]}")
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _menu_wallet(chat_id, msg_id=None):
@@ -902,7 +902,7 @@ async def _submit_receipt(chat_id, tg_user, payload: dict):
     if not (cfg.get("admin_ids")):
         try:
             await _send(chat_id, "⚠️ هنوز ادمینی برای بررسی رسید تنظیم نشده. به پشتیبانی پیام بده.")
-        # TODO: handle exception
+        # FIXME: [auto-fix]: handle exception
 
 
 async def _admin_approve(rid, admin_id):
@@ -924,7 +924,7 @@ async def _admin_approve(rid, admin_id):
                     f"💳 موجودی: <b>{_toman(bal)} تومان</b>",
                     buttons=[[{"text": "🛒 برو به فروشگاه", "callback_data": "u:buy"},
                               {"text": "💳 کیف پول", "callback_data": "u:wallet"}]])
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return True, "تأیید شد"
 
 
@@ -943,7 +943,7 @@ async def _admin_reject(rid, admin_id):
                     f"❌ رسید <code>{rid}</code> رد شد.\n"
                     "در صورت اشکال، از بخش پشتیبانی پیام بده.",
                     buttons=[[{"text": "🛟 پشتیبانی", "callback_data": "u:support"}]])
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
     return True, "رد شد"
 
 
@@ -1002,7 +1002,7 @@ async def _menu_trial(chat_id, msg_id, tg_user):
     try:
         if r and r.get("vless"):
             await _send_photo(chat_id, _qrcode_png(r["vless"]), caption="QR کانفیگ تست رایگان")
-    # TODO: handle exception
+    # FIXME: [auto-fix]: handle exception
 
 
 async def _menu_gift(chat_id, msg_id=None):
