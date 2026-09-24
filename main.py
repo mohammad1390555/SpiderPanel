@@ -70,7 +70,7 @@ CONFIG = {
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.environ.get("ALLOWED_ORIGIN", "*")],
+    allow_origins=[os.environ.get("ALLOWED_ORIGIN", "https://your-domain.com")],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
